@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Графічний редактор</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        #drawCanvas {
+            border: 1px solid black;
+            cursor: crosshair;
+        }
+
+        .topMenu {
+            height: 75px;
+            border-top: 1px solid black;
+            border-bottom: 1px solid black;
+            height: 5%;
+            width: 100%;
+        }
+
+        label {
+            margin-left: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="topMenu">
+        <label>Оберіть форму:</label>
+        <div>
+            <input type="radio" id="squareShape" name="chosenShape" value="square">
+            <label for="squareShape">Квадрат</label>
+            <input type="radio" id="circleShape" name="chosenShape" value="circle">
+            <label for="circleShape">Круг</label>
+            <input type="radio" id="diamondShape" name="chosenShape" value="diamond">
+            <label for="diamondShape">Ромб</label>
+            <input type="radio" id="triangleShape" name="chosenShape" value="triangle">
+            <label for="triangleShape">Прямокутний трикутник</label>
+            <label for="chosenColor">Оберіть колір:</label>
+            <input type="color" id="chosenColor">
+        </div>
+    </div>
+    <canvas id="drawCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('drawCanvas');
+        const context = canvas.getContext('2d');
+        let isSketching = false;
+        let startPtX, startPtY, endPtX, endPtY;
+
+        function initializeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.onload = initializeCanvas();
+        window.onresize = initializeCanvas();
+
+        canvas.addEventListener('mousedown', startSketching);
+        canvas.addEventListener('mouseup', endSketching);
+        canvas.addEventListener('mousemove', sketch);
+
+        function startSketching(event) {
+            isSketching = true;
+            startPtX = event.offsetX;
+            startPtY = event.offsetY;
+        }
+
+        function endSketching(event) {
+            if (isSketching) {
+                isSketching = false;
+                endPtX = event.offsetX;
+                endPtY = event.offsetY;
+                drawSelectedShape();
+            }
+        }
+
+        function sketch(event) {
+            if (!isSketching) return;
+        }
+
+        function drawSelectedShape() {
+            const chosenShape = document.querySelector('input[name="chosenShape"]:checked').value;
+            const chosenColor = document.getElementById('chosenColor').value;
+
+            context.fillStyle = chosenColor;
+            if (chosenShape === 'square') {
+                context.fillRect(startPtX, startPtY, endPtX - startPtX, endPtY - startPtY);
+            } else if (chosenShape === 'circle') {
+                const radius = Math.sqrt(Math.pow(endPtX - startPtX, 2) + Math.pow(endPtY - startPtY, 2));
+                context.beginPath();
+                context.arc(startPtX, startPtY, radius, 0, 2 * Math.PI);
+                context.fill();
+            } else if (chosenShape === 'diamond') {
+                context.beginPath();
+                context.moveTo(startPtX, startPtY + (endPtY - startPtY) / 2);
+                context.lineTo(startPtX + (endPtX - startPtX) / 2, startPtY);
+                context.lineTo(endPtX, startPtY + (endPtY - startPtY) / 2);
+                context.lineTo(startPtX + (endPtX - startPtX) / 2, endPtY);
+                context.closePath();
+                context.fill();
+            } else if (chosenShape === 'triangle') {
+                context.beginPath();
+                context.moveTo(startPtX, startPtY);
+                context.lineTo(endPtX, startPtY);
+                context.lineTo(startPtX, endPtY);
+                context.closePath();
+                context.fill();
+            }
+        }
+    </script>
+</body>
+
+</html>
